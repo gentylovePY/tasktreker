@@ -15,6 +15,7 @@
 		447A9D582DB58AF000AC7453 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 447A9D572DB58AF000AC7453 /* FirebaseFirestore */; };
 		447A9D5A2DB58B3A00AC7453 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 447A9D592DB58B3A00AC7453 /* FirebaseFirestoreCombine-Community */; };
 		447A9D5C2DB58C5600AC7453 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 447A9D5B2DB58C5600AC7453 /* FirebaseAuth */; };
+		448E8BE82DBAAD2C007E134C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 448E8BE72DBAAD2C007E134C /* FirebaseDatabase */; };
 		44FD825C2DB532690043F59E /* Untitled.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FD825B2DB532670043F59E /* Untitled.swift */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +72,7 @@
 				447A9D512DB58A5700AC7453 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				447A9D4F2DB58A5700AC7453 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
 				447A9D582DB58AF000AC7453 /* FirebaseFirestore in Frameworks */,
+				448E8BE82DBAAD2C007E134C /* FirebaseDatabase in Frameworks */,
 				447A9D5A2DB58B3A00AC7453 /* FirebaseFirestoreCombine-Community in Frameworks */,
 				447A9D5C2DB58C5600AC7453 /* FirebaseAuth in Frameworks */,
 			);
@@ -150,6 +152,7 @@
 				447A9D572DB58AF000AC7453 /* FirebaseFirestore */,
 				447A9D592DB58B3A00AC7453 /* FirebaseFirestoreCombine-Community */,
 				447A9D5B2DB58C5600AC7453 /* FirebaseAuth */,
+				448E8BE72DBAAD2C007E134C /* FirebaseDatabase */,
 			);
 			productName = tasktreker;
 			productReference = 44FD81DB2DB51E530043F59E /* tasktreker.app */;
@@ -646,6 +649,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 447A9D4B2DB58A5700AC7453 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		448E8BE72DBAAD2C007E134C /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 447A9D4B2DB58A5700AC7453 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
