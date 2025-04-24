@@ -27,12 +27,3 @@ struct Task: Codable, Identifiable, Equatable {
         case id
     }
 }
-
-extension Task {
-    static let mock = Task(
-        id: "1",
-        text: "Пример задачи",
-        date: "01.01.2025",
-        createdAt: "2025-01-01T00:00:00.000000"
-    )
-}

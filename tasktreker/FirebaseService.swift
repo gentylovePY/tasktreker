@@ -44,7 +44,7 @@ class FirebaseService: ObservableObject {
                         }
                         
                         self.currentUserTasks = tasks.sorted {
-                            $0.date < $1.date // Сортируем по дате выполнения
+                            $0.date < $1.date
                         }
                     }
                 } catch {
@@ -61,23 +61,21 @@ class FirebaseService: ObservableObject {
             "created_at": task.createdAt
         ]
         
-        databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData) { error, _ in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.error = error.localizedDescription
-                }
-            }
-        }
+        databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData)
+    }
+    
+    func updateTask(_ task: Task, for email: String) {
+        let taskData: [String: Any] = [
+            "text": task.text,
+            "date": task.date,
+            "created_at": task.createdAt
+        ]
+        
+        databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData)
     }
     
     func deleteTask(_ task: Task, for email: String) {
-        databaseRef.child("users/\(email)/tasks/\(task.id)").removeValue { error, _ in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.error = error.localizedDescription
-                }
-            }
-        }
+        databaseRef.child("users/\(email)/tasks/\(task.id)").removeValue()
     }
     
     deinit {
