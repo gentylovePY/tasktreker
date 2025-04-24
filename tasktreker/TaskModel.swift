@@ -1,4 +1,3 @@
-// Models.swift
 import Foundation
 
 struct User: Codable {
@@ -16,7 +15,7 @@ struct User: Codable {
     }
 }
 
-struct Task: Codable, Identifiable {
+struct Task: Codable, Identifiable, Equatable {
     var id: String
     let text: String
     let date: String
@@ -27,4 +26,13 @@ struct Task: Codable, Identifiable {
         case createdAt = "created_at"
         case id
     }
+}
+
+extension Task {
+    static let mock = Task(
+        id: "1",
+        text: "Пример задачи",
+        date: "01.01.2025",
+        createdAt: "2025-01-01T00:00:00.000000"
+    )
 }

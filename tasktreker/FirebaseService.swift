@@ -1,4 +1,3 @@
-// FirebaseService.swift
 import Foundation
 import FirebaseDatabase
 
@@ -30,14 +29,13 @@ class FirebaseService: ObservableObject {
                 }
                 
                 do {
-                    // Получаем задачи пользователя
                     if let tasksDict = userDict["tasks"] as? [String: Any] {
                         var tasks: [Task] = []
                         
                         for (taskId, taskData) in tasksDict {
                             if let taskDict = taskData as? [String: Any] {
                                 var taskJson = taskDict
-                                taskJson["id"] = taskId // Добавляем ID задачи
+                                taskJson["id"] = taskId
                                 
                                 let taskData = try JSONSerialization.data(withJSONObject: taskJson)
                                 let task = try JSONDecoder().decode(Task.self, from: taskData)
@@ -46,11 +44,37 @@ class FirebaseService: ObservableObject {
                         }
                         
                         self.currentUserTasks = tasks.sorted {
-                            $0.createdAt > $1.createdAt // Сортируем по дате создания (новые сначала)
+                            $0.date < $1.date // Сортируем по дате выполнения
                         }
                     }
                 } catch {
                     self.error = "Ошибка обработки задач: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func addTask(_ task: Task, for email: String) {
+        let taskData: [String: Any] = [
+            "text": task.text,
+            "date": task.date,
+            "created_at": task.createdAt
+        ]
+        
+        databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData) { error, _ in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.error = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    func deleteTask(_ task: Task, for email: String) {
+        databaseRef.child("users/\(email)/tasks/\(task.id)").removeValue { error, _ in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.error = error.localizedDescription
                 }
             }
         }
