@@ -54,22 +54,34 @@ struct MainView: View {
                 }
             }
             .navigationTitle("Мои задачи")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddTask = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingAddTask) {
-                AddTaskView(
-                    firebaseService: firebaseService,
-                    userEmail: userEmail
-                )
-            }
-        }
+                      .toolbar {
+                          ToolbarItem(placement: .navigationBarLeading) {
+                              NavigationLink {
+                                  ProfileView(firebaseService: firebaseService)
+                                      .environmentObject(authManager)
+                              } label: {
+                                  Image(systemName: "person.circle.fill")
+                                      .font(.title2)
+                                      .foregroundColor(primaryColor)
+                              }
+                          }
+                          
+                          ToolbarItem(placement: .navigationBarTrailing) {
+                              Button {
+                                  showingAddTask = true
+                              } label: {
+                                  Image(systemName: "plus")
+                                      .font(.headline)
+                              }
+                          }
+                      }
+                      .sheet(isPresented: $showingAddTask) {
+                          AddTaskView(
+                              firebaseService: firebaseService,
+                              userEmail: userEmail
+                          )
+                      }
+                  }
         .onAppear {
             firebaseService.fetchUserTasks(email: userEmail)
         }
