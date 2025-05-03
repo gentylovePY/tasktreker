@@ -55,11 +55,19 @@ class FirebaseService: ObservableObject {
     }
     
     func addTask(_ task: Task, for email: String) {
-        let taskData: [String: Any] = [
+        var taskData: [String: Any] = [
             "text": task.text,
             "date": task.date,
             "created_at": task.createdAt
         ]
+        
+        if let priority = task.priority {
+            taskData["priority"] = priority
+        }
+        
+        if let iot = task.iot {
+            taskData["iot"] = iot
+        }
         
         databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData)
     }

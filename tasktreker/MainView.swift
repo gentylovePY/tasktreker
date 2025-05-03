@@ -25,7 +25,7 @@ struct MainView: View {
     @State private var selectedFilter: TaskFilter = .all
     @State private var isRefreshing = false
     
-    private let userEmail = "shshmsnem@yandex_dot_ru"
+    private let userEmail = "shshmsnem@yandexru"
     private let primaryColor = Color(hex: "5E72EB")
     
     var body: some View {
@@ -159,6 +159,11 @@ struct TaskCard: View {
     let primaryColor: Color
     let onDelete: () -> Void
     
+    // Добавляем вычисляемое свойство для определения важности задачи
+    private var isImportant: Bool {
+        task.iot == 2
+    }
+    
     var body: some View {
         NavigationLink {
             TaskDetailView(
@@ -191,9 +196,15 @@ struct TaskCard: View {
                 }
             }
             .padding()
-            .background(Color(.systemBackground))
+            .background(isImportant ? Color.red.opacity(0.1) : Color(.systemBackground)) // Изменяем фон для важных задач
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isImportant ? Color.red : Color.clear, lineWidth: isImportant ? 2 : 0) // Красная рамка для важных задач
+            )
             .cornerRadius(12)
             .shadow(radius: 2)
+            .scaleEffect(isImportant ? 1.02 : 1.0) // Увеличиваем размер важных задач
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isImportant)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -214,6 +225,8 @@ struct TaskCard: View {
             return .red
         } else if isDueToday {
             return .orange
+        } else if isImportant {
+            return .red // Красный цвет для важных задач
         } else {
             return primaryColor
         }
@@ -224,6 +237,8 @@ struct TaskCard: View {
             return "exclamationmark"
         } else if isDueToday {
             return "clock.fill"
+        } else if isImportant {
+            return "exclamationmark.triangle.fill" // Новая иконка для важных задач
         } else {
             return "checkmark.circle.fill"
         }
@@ -242,6 +257,7 @@ struct TaskCard: View {
     }
 }
 
+
 struct TaskDetailView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var firebaseService: FirebaseService
@@ -251,7 +267,12 @@ struct TaskDetailView: View {
     @State private var isEditing = false
     @State private var editedText: String
     @State private var editedDate: Date
+    @State private var isImportant: Bool
     @State private var showingDeleteAlert = false
+    @State private var cardOffset: CGSize = .zero
+    @State private var isAnimating = false
+    
+    private let primaryColor = Color(hex: "5E72EB")
     
     init(task: Task, firebaseService: FirebaseService, userEmail: String) {
         self.task = task
@@ -259,58 +280,232 @@ struct TaskDetailView: View {
         self.userEmail = userEmail
         self._editedText = State(initialValue: task.text)
         self._editedDate = State(initialValue: DateFormatter.taskDateFormatter.date(from: task.date) ?? Date())
+        self._isImportant = State(initialValue: task.iot == 2)
     }
     
     var body: some View {
-        Form {
-            if isEditing {
-                Section {
-                    TextField("Текст задачи", text: $editedText)
-                    DatePicker("Дата выполнения", selection: $editedDate, displayedComponents: .date)
-                }
-            } else {
-                Section {
-                    Text(task.text)
-                    Text(task.date)
-                }
-                
-                Section {
-                    Text("Создано: \(formattedDate(task.createdAt))")
-                        .foregroundColor(.secondary)
-                }
-            }
+        ZStack {
+            // Анимированный фон
+            RadialGradient(
+                gradient: Gradient(colors: [Color(.systemGroupedBackground), Color(.systemGroupedBackground).opacity(0.7)]),
+                center: .center,
+                startRadius: isAnimating ? 100 : 300,
+                endRadius: isAnimating ? 500 : 100
+            )
+            .ignoresSafeArea()
+            .animation(Animation.easeInOut(duration: 8).repeatForever(), value: isAnimating)
             
-            if !isEditing {
-                Section {
-                    Button(role: .destructive) {
-                        showingDeleteAlert = true
-                    } label: {
-                        Label("Удалить задачу", systemImage: "trash")
+            // Основной контент
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Карточка задачи
+                    VStack(alignment: .leading, spacing: 16) {
+                        if isEditing {
+                            // Редактирование
+                            TextField("Описание задачи", text: $editedText, axis: .vertical)
+                                .font(.title3)
+                                .padding()
+                                .background(Color(.secondarySystemBackground))
+                                .cornerRadius(12)
+                                .transition(.opacity)
+                            
+                            // Переключатель важности
+                            Toggle(isOn: $isImportant) {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(isImportant ? .red : .gray)
+                                    Text("Важная задача")
+                                        .font(.headline)
+                                        .foregroundColor(isImportant ? .red : .primary)
+                                }
+                            }
+                            .toggleStyle(SwitchToggleStyle(tint: .red))
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            
+                            DatePicker(
+                                "Дата выполнения",
+                                selection: $editedDate,
+                                in: Date()...,
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.graphical)
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                        } else {
+                            // Просмотр
+                            Text(task.text)
+                                .font(.title3)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(VisualEffectView(.systemThinMaterial))
+                                .cornerRadius(12)
+                                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            
+                            // Важность задачи
+                            if isImportant {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.red)
+                                    Text("Важная задача")
+                                        .font(.subheadline)
+                                        .foregroundColor(.red)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.red, lineWidth: 1)
+                                )
+                            }
+                            
+                            // Дата выполнения
+                            HStack {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(primaryColor)
+                                Text(task.date)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(VisualEffectView(.systemThinMaterial))
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            
+                            // Дата создания
+                            HStack {
+                                Image(systemName: "clock")
+                                    .foregroundColor(primaryColor)
+                                Text("Создано: \(formattedDate(task.createdAt))")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal)
+                        }
                     }
+                    .padding()
+                    .background(VisualEffectView(.systemMaterial))
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+                    .offset(cardOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                withAnimation(.interactiveSpring()) {
+                                    cardOffset = value.translation
+                                }
+                            }
+                            .onEnded { value in
+                                if abs(value.translation.width) > 100 {
+                                    dismiss()
+                                } else {
+                                    withAnimation(.spring()) {
+                                        cardOffset = .zero
+                                    }
+                                }
+                            }
+                    )
+                    
+                    // Кнопки действий
+                    HStack(spacing: 20) {
+                        if isEditing {
+                            // Кнопки в режиме редактирования
+                            Button(action: cancelEditing) {
+                                HStack {
+                                    Image(systemName: "xmark")
+                                    Text("Отменить")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .foregroundColor(.red)
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                            
+                            Button(action: saveChanges) {
+                                HStack {
+                                    Image(systemName: "checkmark")
+                                    Text("Сохранить")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .foregroundColor(.white)
+                                .background(primaryColor)
+                                .cornerRadius(12)
+                                .shadow(color: primaryColor.opacity(0.3), radius: 10, y: 5)
+                            }
+                        } else {
+                            // Кнопки в режиме просмотра
+                            Button(action: {
+                                withAnimation(.spring()) {
+                                    isEditing = true
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "pencil")
+                                    Text("Изменить")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .foregroundColor(primaryColor)
+                                .background(primaryColor.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                            
+                            Button(action: {
+                                withAnimation {
+                                    showingDeleteAlert = true
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "trash")
+                                    Text("Удалить")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .foregroundColor(.red)
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
                 }
+                .padding(.top, 30)
             }
         }
-        .navigationTitle(isEditing ? "Редактирование" : "Детали задачи")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if isEditing {
-                    Button("Сохранить") {
-                        saveChanges()
-                    }
-                } else {
-                    Button("Изменить") {
-                        isEditing = true
-                    }
-                }
+            ToolbarItem(placement: .principal) {
+                Text(isEditing ? "Редактирование" : "Детали задачи")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .transition(.opacity)
             }
         }
         .alert("Удалить задачу?", isPresented: $showingDeleteAlert) {
             Button("Удалить", role: .destructive) {
-                firebaseService.deleteTask(task, for: userEmail)
-                dismiss()
+                withAnimation {
+                    firebaseService.deleteTask(task, for: userEmail)
+                    dismiss()
+                }
             }
             Button("Отмена", role: .cancel) {}
+        }
+        .onAppear {
+            withAnimation {
+                isAnimating = true
+            }
         }
     }
     
@@ -320,12 +515,26 @@ struct TaskDetailView: View {
             id: task.id,
             text: editedText,
             date: updatedDate,
-            createdAt: task.createdAt
+            createdAt: task.createdAt,
+            priority: task.priority,
+            iot: isImportant ? 2 : 1 // Сохраняем важность
         )
         
         firebaseService.updateTask(updatedTask, for: userEmail)
-        task = updatedTask
-        isEditing = false
+        
+        withAnimation(.spring()) {
+            task = updatedTask
+            isEditing = false
+        }
+    }
+    
+    private func cancelEditing() {
+        withAnimation(.spring()) {
+            editedText = task.text
+            editedDate = DateFormatter.taskDateFormatter.date(from: task.date) ?? Date()
+            isImportant = task.iot == 2
+            isEditing = false
+        }
     }
     
     private func formattedDate(_ dateString: String) -> String {
@@ -342,56 +551,40 @@ struct TaskDetailView: View {
     }
 }
 
-struct AddTaskView: View {
-    @Environment(\.dismiss) var dismiss
-    @ObservedObject var firebaseService: FirebaseService
-    let userEmail: String
+// Эффект размытия (для iOS 15+)
+struct VisualEffectView: UIViewRepresentable {
+    var effect: UIVisualEffect?
     
-    @State private var text = ""
-    @State private var date = Date()
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    TextField("Текст задачи", text: $text)
-                    DatePicker("Дата выполнения", selection: $date, displayedComponents: .date)
-                }
-            }
-            .navigationTitle("Новая задача")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Добавить") {
-                        addTask()
-                    }
-                    .disabled(text.isEmpty)
-                }
-            }
-        }
+    init(_ effect: UIBlurEffect.Style) {
+        self.effect = UIBlurEffect(style: effect)
     }
     
-    private func addTask() {
-        let taskId = "\(Int(Date().timeIntervalSince1970 * 1000))"
-        let createdAt = ISO8601DateFormatter().string(from: Date())
-        let dateString = DateFormatter.taskDateFormatter.string(from: date)
-        
-        let task = Task(
-            id: taskId,
-            text: text,
-            date: dateString,
-            createdAt: createdAt
-        )
-        
-        firebaseService.addTask(task, for: userEmail)
-        dismiss()
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: effect)
+    }
+    
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+        uiView.effect = effect
     }
 }
+
+struct TaskDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            TaskDetailView(
+                task: Task(
+                    id: "1",
+                    text: "Пример задачи с длинным текстом для демонстрации интерфейса",
+                    date: "01.01.2025",
+                    createdAt: "2025-01-01T00:00:00.000000"
+                ),
+                firebaseService: FirebaseService(),
+                userEmail: "test@example.com"
+            )
+        }
+    }
+}
+
 
 struct FilterBar: View {
     @Binding var selectedFilter: TaskFilter

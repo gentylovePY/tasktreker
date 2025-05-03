@@ -20,9 +20,11 @@ struct Task: Codable, Identifiable, Equatable {
     let text: String
     let date: String
     let createdAt: String
+    var priority: Int?  // Опциональное поле приоритета
+    var iot: Int?       // Добавленное поле iot
     
     enum CodingKeys: String, CodingKey {
-        case text, date
+        case text, date, priority, iot
         case createdAt = "created_at"
         case id
     }
