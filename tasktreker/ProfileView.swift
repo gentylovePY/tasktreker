@@ -17,7 +17,7 @@ struct ProfileView: View {
     @State private var avatarImage: UIImage?
     @State private var userName: String = "Роман Гиниятов"
     
-    // Статистика
+
     private var totalTasks: Int { firebaseService.currentUserTasks.count }
     private var completedTasks: Int {
         firebaseService.currentUserTasks.filter { task in
@@ -60,7 +60,7 @@ struct ProfileView: View {
     
     private var profileHeader: some View {
         HStack(spacing: 20) {
-            // Аватарка с возможностью изменения
+
             Button(action: { isImagePickerPresented = true }) {
                 ZStack {
                     if let avatarImage = avatarImage {
@@ -146,8 +146,7 @@ struct ProfileView: View {
         .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
     
-    // Вставить в ProfileView перед logoutButton
-    // В структуре ProfileView заменим devicesSection на:
+
     private var devicesSection: some View {
         VStack(spacing: 0) {
             HStack {
@@ -175,7 +174,7 @@ struct ProfileView: View {
         .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
 
-    // Моковые данные
+
     private var mockDevices: [Device] {
         [
             Device(

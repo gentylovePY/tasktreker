@@ -43,7 +43,7 @@ struct DevicesView: View {
                         }
                         .padding(.horizontal)
                         
-                        // Сетка устройств (2 колонки)
+                 
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
                             ForEach(allDevices) { device in
                                 DeviceGridCard(device: device)
@@ -52,7 +52,7 @@ struct DevicesView: View {
                         .padding(.horizontal)
                     }
                     
-                    // Секция "Про"
+          
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Про")
                             .font(.headline.bold())

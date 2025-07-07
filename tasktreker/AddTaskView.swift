@@ -9,14 +9,14 @@ struct AddTaskView: View {
     @State private var selectedDate = Date()
     @State private var isDatePickerShown = false
     @State private var isImportant = false
-    @State private var selectedDevice: Device? = nil // Добавляем состояние для выбранного устройства
-    @State private var showDeviceSelection = false // Для отображения выбора устройства
+    @State private var selectedDevice: Device? = nil 
+    @State private var showDeviceSelection = false
     @FocusState private var isTextFieldFocused: Bool
     @State private var buttonScale: CGFloat = 1.0
     
     private let primaryColor = Color(hex: "5E72EB")
     
-    // Моковые устройства (можно заменить на реальные)
+
     private let mockDevices: [Device] = [
        
         Device(
