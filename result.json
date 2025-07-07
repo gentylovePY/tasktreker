@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "product_id": "789101",
+      "short_name": "Молоко",
+      "full_name": "Молоко пастеризованное 3,2% 2 кг, Село Зеленое",
+      "description": "Свежее молоко от проверенных фермеров",
+      "url": "https://www.ozon.ru/product/moloko-pasterizovannoe-3-2-2-kg-selo-zelenoe-146215080/?at=GRt2rLn74TZX8RKPSqKBy92U0VXjrMCRL5YPPhpno78l&ectx=1&miniapp=supermarket",
+      "price": "85 RUB",
+      "price_with_card": "80 ₽",
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-d/wc1000/7498991461.jpg"
+    },
+    {
+      "product_id": "112233",
+      "short_name": "Открывашка",
+      "full_name": "Штопор нарзанник двухступенчатый, Нож сомелье для вина",
+      "description": "Удобная и простая открывашка для банок",
+      "url": "https://www.ozon.ru/product/shtopor-narzannik-dvuhstupenchatyy-nozh-somele-dlya-vina-1430189432/?at=x6tPpMxYlhXZR7llhpM9OVgH5ooW6NcjEX1l8i37wWG2",
+      "price": "150 RUB",
+      "price_with_card": "170 ₽",
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-p/wc1000/6943718113.jpg"
+    },
+    {
+      "product_id": "445566",
+      "short_name": "Одеяло",
+      "full_name": "Одеяло зимнее утепленное 140x200 см",
+      "description": "Теплое и мягкое одеяло для комфортного сна",
+      "url": "https://www.ozon.ru/product/odeyalo-galtex-evro-200x220sm-layt-vsesezonnoe-napolnitel-silikonizirovannoe-volokno-150g-1956346185/?at=Rltywm526hLkgxMU6MlmxDiG1xoq5S5JEpp7FzpqXR8",
+      "price": "999 RUB",
+      "price_with_card": "1114 ₽",
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-x/wc1000/7472420925.jpg"
+    },
+    {
+      "product_id": "778899",
+      "short_name": "Хлеб",
+      "full_name": "Хлеб ржаной нарезной 500 г",
+      "description": "Свежий ржаной хлеб с хрустящей корочкой",
+      "url": "https://www.ozon.ru/product/778899",
+      "price": "60 RUB",
+      "price_with_card": "55 ₽",
+      "image_url": "https://cdn1.ozon.ru/s3/multimedia-3/778899.jpg"
+    },
+    {
+      "product_id": "990011",
+      "short_name": "Масло",
+      "full_name": "Масло сливочное 82,5% 180 г",
+      "description": "Натуральное сливочное масло высшего сорта",
+      "url": "https://www.ozon.ru/product/990011",
+      "price": "150 RUB",
+      "price_with_card": "140 ₽",
+      "image_url": "https://cdn1.ozon.ru/s3/multimedia-3/990011.jpg"
+    },
+    {
+      "product_id": "223344",
+      "short_name": "Пылесос",
+      "full_name": "Пылесос мощный с мешком для пыли",
+      "description": "Мощный пылесос с HEPA-фильтром для эффективной уборки",
+      "url": "https://www.ozon.ru/product/223344",
+      "price": "4500 RUB",
+      "price_with_card": "4200 ₽",
+      "image_url": "https://cdn1.ozon.ru/s3/multimedia-3/223344.jpg"
+    }
+  ]
+}
