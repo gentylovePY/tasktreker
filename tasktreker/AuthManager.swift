@@ -6,12 +6,11 @@ class AuthManager: ObservableObject {
     @Published var showWebView = false
     @Published var error: String?
     
-    // Ваши данные из Яндекс OAuth
     private let clientId = "131f4ee3e4a3410da7e8af137230c0d2"
     private let clientSecret = "7c42dcaeae384bd7adcfb9b78c2fd070"
     private let redirectURI = "https://oauth.yandex.ru/verification_code"
     
-    // URL для авторизации
+
     var authURL: URL? {
         var components = URLComponents(string: "https://oauth.yandex.ru/authorize")
         components?.queryItems = [
@@ -23,7 +22,7 @@ class AuthManager: ObservableObject {
         return components?.url
     }
     
-    // Обработка ответа от Яндекса
+
     func handleCallback(url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
@@ -33,7 +32,7 @@ class AuthManager: ObservableObject {
         exchangeCodeForToken(code: code)
     }
     
-    // Обмен кода на токен
+
     private func exchangeCodeForToken(code: String) {
         isLoading = true
         error = nil
@@ -77,25 +76,108 @@ class AuthManager: ObservableObject {
         }.resume()
     }
     
-    // Сохранение токенов
+    func fetchUserInfo(completion: @escaping ([String: Any]?, Error?) -> Void) {
+        guard let accessToken = KeychainHelper.shared.get("yandexAccessToken") else {
+            completion(nil, NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "Требуется авторизация"]))
+            return
+        }
+        
+        let url = URL(string: "https://api.iot.yandex.net/v1.0/user/info")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("v1", forHTTPHeaderField: "X-API-Version")
+        
+        print("Sending request to: \(url.absoluteString)")
+        print("Headers: \(request.allHTTPHeaderFields ?? [:])")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Request error: \(error.localizedDescription)")
+                completion(nil, error)
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response format")
+                completion(nil, NSError(domain: "Auth", code: 500, userInfo: [NSLocalizedDescriptionKey: "Неверный ответ сервера"]))
+                return
+            }
+            
+            print("Status code: \(httpResponse.statusCode)")
+            print("Response headers: \(httpResponse.allHeaderFields)")
+            
+            guard let data = data else {
+                print("No data received")
+                completion(nil, NSError(domain: "Auth", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Нет данных в ответе"]))
+                return
+            }
+            
+          
+            if let rawResponse = String(data: data, encoding: .utf8) {
+                print("Raw response: \(rawResponse)")
+            }
+            
+        
+            do {
+              
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    print("Successfully parsed as JSON")
+                    completion(json, nil)
+                    return
+                }
+                
+
+                if let stringResponse = String(data: data, encoding: .utf8) {
+                    print("Response is string: \(stringResponse)")
+                    completion(["raw": stringResponse], nil)
+                    return
+                }
+                
+        
+                completion(nil, NSError(domain: "Auth", code: 500, userInfo: [NSLocalizedDescriptionKey: "Неизвестный формат ответа"]))
+                
+            } catch {
+                print("JSON parsing error: \(error.localizedDescription)")
+                completion(nil, error)
+            }
+        }.resume()
+    }
+    
     private func saveTokens(response: YandexAuthResponse) {
         KeychainHelper.shared.save(response.access_token, forKey: "yandexAccessToken")
         if let refresh_token = response.refresh_token {
             KeychainHelper.shared.save(refresh_token, forKey: "yandexRefreshToken")
         }
+        
+        fetchUserInfo { json, error in
+            if let error = error {
+                print("Ошибка получения информации:", error.localizedDescription)
+                return
+            }
+            
+            guard let json = json else {
+                print("Данные не получены")
+                return
+            }
+            
+            print("Успешно получены данные:")
+            dump(json)
+        }
+        
+
+        func logout() {
+            KeychainHelper.shared.delete("yandexAccessToken")
+            KeychainHelper.shared.delete("yandexRefreshToken")
+            isAuthenticated = false
+        }
     }
     
-    // Выход
-    func logout() {
-        KeychainHelper.shared.delete("yandexAccessToken")
-               KeychainHelper.shared.delete("yandexRefreshToken")
-               isAuthenticated = false
+    struct YandexAuthResponse: Codable {
+        let access_token: String
+        let expires_in: Int
+        let refresh_token: String?
+        let token_type: String
     }
-}
-
-struct YandexAuthResponse: Codable {
-    let access_token: String
-    let expires_in: Int
-    let refresh_token: String?
-    let token_type: String
 }

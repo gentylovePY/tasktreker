@@ -69,15 +69,49 @@ class FirebaseService: ObservableObject {
             taskData["iot"] = iot
         }
         
+        if let shoppingList = task.shopping_list {
+            taskData["shopping_list"] = shoppingList.map { item in
+                [
+                    "full_name": item.full_name,
+                    "image_url": item.image_url,
+                    "price": item.price,
+                    "price_with_card": item.price_with_card,
+                    "short_name": item.short_name,
+                    "url": item.url
+                ]
+            }
+        }
+        
         databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData)
     }
     
     func updateTask(_ task: Task, for email: String) {
-        let taskData: [String: Any] = [
+        var taskData: [String: Any] = [
             "text": task.text,
             "date": task.date,
             "created_at": task.createdAt
         ]
+        
+        if let priority = task.priority {
+            taskData["priority"] = priority
+        }
+        
+        if let iot = task.iot {
+            taskData["iot"] = iot
+        }
+        
+        if let shoppingList = task.shopping_list {
+            taskData["shopping_list"] = shoppingList.map { item in
+                [
+                    "full_name": item.full_name,
+                    "image_url": item.image_url,
+                    "price": item.price,
+                    "price_with_card": item.price_with_card,
+                    "short_name": item.short_name,
+                    "url": item.url
+                ]
+            }
+        }
         
         databaseRef.child("users/\(email)/tasks/\(task.id)").setValue(taskData)
     }

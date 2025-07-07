@@ -169,7 +169,7 @@ struct TaskCard: View {
             TaskDetailView(
                 task: task,
                 firebaseService: FirebaseService(),
-                userEmail: "shshmsnem@yandex_dot_ru"
+                userEmail: "shshmsnem@yandexru"
             )
         } label: {
             HStack(spacing: 16) {
@@ -196,14 +196,14 @@ struct TaskCard: View {
                 }
             }
             .padding()
-            .background(isImportant ? Color.red.opacity(0.1) : Color(.systemBackground)) // Изменяем фон для важных задач
+            .background(isImportant ? Color.red.opacity(0.1) : Color(.systemBackground))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isImportant ? Color.red : Color.clear, lineWidth: isImportant ? 2 : 0) // Красная рамка для важных задач
+                    .stroke(isImportant ? Color.red : Color.clear, lineWidth: isImportant ? 2 : 0)
             )
             .cornerRadius(12)
             .shadow(radius: 2)
-            .scaleEffect(isImportant ? 1.02 : 1.0) // Увеличиваем размер важных задач
+            .scaleEffect(isImportant ? 1.02 : 1.0)
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isImportant)
         }
         .buttonStyle(PlainButtonStyle())
@@ -226,7 +226,7 @@ struct TaskCard: View {
         } else if isDueToday {
             return .orange
         } else if isImportant {
-            return .red // Красный цвет для важных задач
+            return .red
         } else {
             return primaryColor
         }
@@ -238,7 +238,7 @@ struct TaskCard: View {
         } else if isDueToday {
             return "clock.fill"
         } else if isImportant {
-            return "exclamationmark.triangle.fill" // Новая иконка для важных задач
+            return "exclamationmark.triangle.fill"
         } else {
             return "checkmark.circle.fill"
         }
@@ -285,7 +285,6 @@ struct TaskDetailView: View {
     
     var body: some View {
         ZStack {
-            // Анимированный фон
             RadialGradient(
                 gradient: Gradient(colors: [Color(.systemGroupedBackground), Color(.systemGroupedBackground).opacity(0.7)]),
                 center: .center,
@@ -295,13 +294,12 @@ struct TaskDetailView: View {
             .ignoresSafeArea()
             .animation(Animation.easeInOut(duration: 8).repeatForever(), value: isAnimating)
             
-            // Основной контент
             ScrollView {
                 VStack(spacing: 20) {
-                    // Карточка задачи
+                  
                     VStack(alignment: .leading, spacing: 16) {
                         if isEditing {
-                            // Редактирование
+                           
                             TextField("Описание задачи", text: $editedText, axis: .vertical)
                                 .font(.title3)
                                 .padding()
@@ -309,7 +307,6 @@ struct TaskDetailView: View {
                                 .cornerRadius(12)
                                 .transition(.opacity)
                             
-                            // Переключатель важности
                             Toggle(isOn: $isImportant) {
                                 HStack {
                                     Image(systemName: "exclamationmark.triangle.fill")
@@ -335,7 +332,7 @@ struct TaskDetailView: View {
                             .background(Color(.secondarySystemBackground))
                             .cornerRadius(12)
                         } else {
-                            // Просмотр
+                           
                             Text(task.text)
                                 .font(.title3)
                                 .padding()
@@ -344,7 +341,6 @@ struct TaskDetailView: View {
                                 .cornerRadius(12)
                                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                             
-                            // Важность задачи
                             if isImportant {
                                 HStack {
                                     Image(systemName: "exclamationmark.triangle.fill")
@@ -363,7 +359,6 @@ struct TaskDetailView: View {
                                 )
                             }
                             
-                            // Дата выполнения
                             HStack {
                                 Image(systemName: "calendar")
                                     .foregroundColor(primaryColor)
@@ -377,7 +372,6 @@ struct TaskDetailView: View {
                             .cornerRadius(12)
                             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                             
-                            // Дата создания
                             HStack {
                                 Image(systemName: "clock")
                                     .foregroundColor(primaryColor)
@@ -386,6 +380,20 @@ struct TaskDetailView: View {
                                     .foregroundColor(.gray)
                             }
                             .padding(.horizontal)
+                            
+                            
+                            if let shoppingList = task.shopping_list, !shoppingList.isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Список покупок")
+                                        .font(.headline)
+                                        .padding(.top, 8)
+                                    
+                                    ForEach(shoppingList) { item in
+                                        ShoppingItemCard(item: item)
+                                    }
+                                }
+                                .padding(.top, 8)
+                            }
                         }
                     }
                     .padding()
@@ -411,10 +419,9 @@ struct TaskDetailView: View {
                             }
                     )
                     
-                    // Кнопки действий
+                   
                     HStack(spacing: 20) {
                         if isEditing {
-                            // Кнопки в режиме редактирования
                             Button(action: cancelEditing) {
                                 HStack {
                                     Image(systemName: "xmark")
@@ -442,7 +449,6 @@ struct TaskDetailView: View {
                                 .shadow(color: primaryColor.opacity(0.3), radius: 10, y: 5)
                             }
                         } else {
-                            // Кнопки в режиме просмотра
                             Button(action: {
                                 withAnimation(.spring()) {
                                     isEditing = true
@@ -517,7 +523,8 @@ struct TaskDetailView: View {
             date: updatedDate,
             createdAt: task.createdAt,
             priority: task.priority,
-            iot: isImportant ? 2 : 1 // Сохраняем важность
+            iot: isImportant ? 2 : 1,
+            shopping_list: task.shopping_list
         )
         
         firebaseService.updateTask(updatedTask, for: userEmail)
@@ -551,7 +558,66 @@ struct TaskDetailView: View {
     }
 }
 
-// Эффект размытия (для iOS 15+)
+struct ShoppingItemCard: View {
+    let item: ShoppingItem
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            AsyncImage(url: URL(string: item.image_url)) { image in
+                image.resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 80)
+                    .cornerRadius(8)
+                    .clipped()
+            } placeholder: {
+                ProgressView()
+                    .frame(width: 80, height: 80)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.full_name)
+                    .font(.subheadline)
+                    .bold()
+                
+                HStack {
+                    Text(item.price)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    
+                    if item.price != item.price_with_card {
+                        Text(item.price_with_card)
+                            .font(.footnote)
+                            .foregroundColor(.green)
+                    }
+                }
+                
+                Button(action: {
+                    if let url = URL(string: item.url) {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    Text("Открыть в магазине")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+                .padding(.top, 4)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.systemGray5), lineWidth: 1)
+        )
+    }
+}
+    
+
+
 struct VisualEffectView: UIViewRepresentable {
     var effect: UIVisualEffect?
     
@@ -680,4 +746,14 @@ extension DateFormatter {
         formatter.dateFormat = "dd.MM.yyyy"
         return formatter
     }()
+}
+
+extension AsyncImage {
+    func productImageStyle() -> some View {
+        self
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 80, height: 80)
+            .cornerRadius(8)
+            .clipped()
+    }
 }

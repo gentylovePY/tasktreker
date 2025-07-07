@@ -35,16 +35,15 @@ struct ProfileView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
-                // 1. Шапка профиля
+        
                 profileHeader
                 
-                // 2. Статистика
                 statsSection
                 
-                // 3. Настройки
                 settingsSection
                 
-                // 4. Выход
+                devicesSection
+
                 logoutButton
             }
             .padding()
@@ -52,7 +51,7 @@ struct ProfileView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Профиль")
         .alert("Выйти из аккаунта?", isPresented: $showingLogoutAlert) {
-            Button("Выйти", role: .destructive) { authManager.logout() }
+            //Button("Выйти", role: .destructive) { authManager.logout() }
             Button("Отмена", role: .cancel) {}
         }
     }
@@ -145,6 +144,92 @@ struct ProfileView: View {
         .background(Color(.systemBackground))
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+    }
+    
+    // Вставить в ProfileView перед logoutButton
+    // В структуре ProfileView заменим devicesSection на:
+    private var devicesSection: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Мои устройства")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Spacer()
+                
+                NavigationLink(destination: DevicesView(Devices: mockDevices)) {
+                    Text("Все")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.bottom, 8)
+            
+            // Показываем только первые 2 устройства в профиле
+            ForEach(mockDevices.prefix(2)) { device in
+                DeviceRow(device: device)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+    }
+
+    // Моковые данные
+    private var mockDevices: [Device] {
+        [
+            Device(
+                id: "1",
+                name: "Алиса",
+                imageName: "alice",
+                type: "Умная колонка",
+                isOnline: true
+            ),
+            Device(
+                id: "2",
+                name: "Датчик Температуры",
+                imageName: "temp_sensor",
+                type: "Датчик",
+                isOnline: true
+            )
+        ]
+    }
+
+    struct DeviceRow: View {
+        let device: Device
+        var showChevron: Bool = true
+        
+        var body: some View {
+            HStack(spacing: 12) {
+                Image(systemName: device.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(device.isOnline ? .blue : .gray)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(device.name)
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    
+                    Text(device.type)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Circle()
+                    .fill(device.isOnline ? Color.green : Color.gray)
+                    .frame(width: 10, height: 10)
+                
+                if showChevron {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray.opacity(0.5))
+                }
+            }
+            .padding(.vertical, 8)
+        }
     }
     
     private var logoutButton: some View {

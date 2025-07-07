@@ -238,6 +238,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				447A9D4B2DB58A5700AC7453 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4432381F2E0C479700D2A99E /* XCRemoteSwiftPackageReference "CocoaMQTT" */,
+				443238202E0C484500D2A99E /* XCRemoteSwiftPackageReference "CocoaAsyncSocket" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 44FD81DC2DB51E530043F59E /* Products */;
@@ -599,6 +601,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4432381F2E0C479700D2A99E /* XCRemoteSwiftPackageReference "CocoaMQTT" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/emqx/CocoaMQTT";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.9;
+			};
+		};
+		443238202E0C484500D2A99E /* XCRemoteSwiftPackageReference "CocoaAsyncSocket" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/robbiehanson/CocoaAsyncSocket";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.6.5;
+			};
+		};
 		447A9D4B2DB58A5700AC7453 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";

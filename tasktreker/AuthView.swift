@@ -13,7 +13,7 @@ struct AuthView: View {
     
     var body: some View {
         ZStack {
-            // Градиентный фон с анимацией
+          
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "3A7BD5"), Color(hex: "00D2FF")]),
                 startPoint: .topLeading,
@@ -32,7 +32,7 @@ struct AuthView: View {
                     .transition(.opacity.combined(with: .scale))
             } else {
                 VStack(spacing: 32) {
-                    // Анимированное лого
+                
                     ZStack {
                         Circle()
                             .stroke(Color.white.opacity(0.2), lineWidth: 4)
@@ -50,7 +50,7 @@ struct AuthView: View {
                         value: isAnimating
                     )
                     
-                    // Заголовок с тенью
+            
                     VStack(spacing: 8) {
                         Text("TASK TRACKER")
                             .font(.system(size: 28, weight: .black, design: .rounded))
@@ -64,7 +64,7 @@ struct AuthView: View {
                     
                     Spacer()
                     
-                    // Кнопка авторизации
+                 
                     Button(action: {
                         withAnimation(.spring()) {
                             authManager.showWebView = true
@@ -99,7 +99,7 @@ struct AuthView: View {
                 }
             }
             
-            // Индикатор загрузки
+      
             if authManager.isLoading {
                 ZStack {
                     Color.black.opacity(0.4)
@@ -132,7 +132,7 @@ struct AuthView: View {
     }
 }
 
-// Расширение для HEX цветов
+
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

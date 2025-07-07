@@ -16,7 +16,7 @@ class KeychainHelper {
         SecItemAdd(query, nil)
     }
     
-    func read(forKey key: String) -> String? {
+    func get(_ key: String) -> String? {
         let query = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccount: key,

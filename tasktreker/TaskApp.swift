@@ -13,6 +13,7 @@ import Firebase
 struct TaskApp: App {
     init() {
         FirebaseApp.configure()
+       
     }
     
     var body: some Scene {
@@ -20,4 +21,5 @@ struct TaskApp: App {
             AuthView()
         }
     }
+ 
 }

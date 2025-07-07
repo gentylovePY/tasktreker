@@ -9,22 +9,33 @@ struct AddTaskView: View {
     @State private var selectedDate = Date()
     @State private var isDatePickerShown = false
     @State private var isImportant = false
+    @State private var selectedDevice: Device? = nil // Добавляем состояние для выбранного устройства
+    @State private var showDeviceSelection = false // Для отображения выбора устройства
     @FocusState private var isTextFieldFocused: Bool
     @State private var buttonScale: CGFloat = 1.0
     
     private let primaryColor = Color(hex: "5E72EB")
     
+    // Моковые устройства (можно заменить на реальные)
+    private let mockDevices: [Device] = [
+       
+        Device(
+            id: "1",
+            name: "Water Sensor",
+            imageName: "water_sensor",
+            type: "Датчик",
+            isOnline: true
+        )
+    ]
+    
     var body: some View {
         NavigationView {
             ZStack {
-                // Фон
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Форма
                     VStack(spacing: 20) {
-                        // Поле ввода
                         TextField("О чем напомнить?", text: $taskText)
                             .focused($isTextFieldFocused)
                             .padding()
@@ -38,7 +49,32 @@ struct AddTaskView: View {
                                 }
                             }
                         
-                        // Переключатель важности
+                        // Кнопка выбора устройства
+                        Button(action: {
+                            showDeviceSelection = true
+                        }) {
+                            HStack {
+                                Image(systemName: "house.fill")
+                                    .foregroundColor(primaryColor)
+                                
+                                Text(selectedDevice?.name ?? "Выберите устройство")
+                                    .foregroundColor(selectedDevice != nil ? .primary : .gray)
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            .padding(.horizontal)
+                        }
+                        .sheet(isPresented: $showDeviceSelection) {
+                            DeviceSelectionView(devices: mockDevices, selectedDevice: $selectedDevice)
+                        }
+                        
                         Toggle(isOn: $isImportant) {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
@@ -55,7 +91,6 @@ struct AddTaskView: View {
                         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                         .padding(.horizontal)
                         
-                        // Дата выполнения
                         VStack(spacing: 8) {
                             HStack {
                                 Text("Дата выполнения")
@@ -111,7 +146,6 @@ struct AddTaskView: View {
                     
                     Spacer()
                     
-                    // Кнопка добавления
                     Button(action: addTask) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
@@ -121,7 +155,7 @@ struct AddTaskView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .foregroundColor(.white)
-                        .background(isImportant ? Color.red : primaryColor) // Красный для важных задач
+                        .background(isImportant ? Color.red : primaryColor)
                         .cornerRadius(12)
                         .scaleEffect(buttonScale)
                         .shadow(color: (isImportant ? Color.red : primaryColor).opacity(0.3), radius: 10, y: 5)
@@ -151,6 +185,13 @@ struct AddTaskView: View {
     }
     
     private func addTask() {
+        // Если выбрано устройство, просто закрываем экран
+        if selectedDevice != nil {
+            dismiss()
+            return
+        }
+        
+        // Стандартная логика добавления задачи
         let taskId = "\(Int(Date().timeIntervalSince1970 * 1000))"
         let createdAt = ISO8601DateFormatter().string(from: Date())
         let dateString = DateFormatter.taskDateFormatter.string(from: selectedDate)
@@ -161,11 +202,61 @@ struct AddTaskView: View {
             date: dateString,
             createdAt: createdAt,
             priority: nil,
-            iot: isImportant ? 2 : 1 // Устанавливаем важность
+            iot: isImportant ? 2 : 1
         )
         
         firebaseService.addTask(task, for: userEmail)
         dismiss()
+    }
+}
+
+// Новая View для выбора устройства
+struct DeviceSelectionView: View {
+    let devices: [Device]
+    @Binding var selectedDevice: Device?
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(devices) { device in
+                    Button(action: {
+                        selectedDevice = device
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: device.imageName)
+                                .foregroundColor(device.isOnline ? .blue : .gray)
+                                .frame(width: 30, height: 30)
+                            
+                            VStack(alignment: .leading) {
+                                Text(device.name)
+                                    .foregroundColor(.primary)
+                                Text(device.type)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            if selectedDevice?.id == device.id {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Выберите устройство")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Готово") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
